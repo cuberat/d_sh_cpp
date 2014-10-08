@@ -16,25 +16,25 @@
 
 #include <d_sh_cpp/d_sh_obj.h>
 
-template <class T> class DSh_Ref {
+template <class T> class DSh_RefBase {
   public:
-    explicit DSh_Ref(T *p = 0): _ptr(0) { this->_acquire(p); }
+    explicit DSh_RefBase(T *p = 0): _ptr(0) { this->_acquire(p); }
     // DSh_Ref(T *p = 0): _ptr(p) { }
 
-    DSh_Ref(const DSh_Ref& r) throw(): _ptr(0) {
+    DSh_RefBase(const DSh_RefBase& r) throw(): _ptr(0) {
         this->_acquire(r._ptr);
     }
 
-    virtual ~DSh_Ref() { this->_release(); }
+    virtual ~DSh_RefBase() { this->_release(); }
 
-    DSh_Ref& operator=(T *p) {
+    DSh_RefBase& operator=(T *p) {
         if (this->_ptr != p) {
             this->_acquire(p);
         }
         return *this;
     }
 
-    DSh_Ref& operator=(const DSh_Ref& r) {
+    DSh_RefBase& operator=(const DSh_RefBase& r) {
         if (this != &r) {
             this->_acquire(r._ptr);
         }
@@ -112,13 +112,13 @@ template <class T> class DSh_Ref {
     
 };
 
-class DSh_ObjRef: public DSh_Ref<DSh_Obj> {
+class DSh_Ref: public DSh_RefBase<DSh_Obj> {
   public:
-  DSh_ObjRef(DSh_Obj *p = 0): DSh_Ref<DSh_Obj>() { this->_acquire(p); }
+  DSh_Ref(DSh_Obj *p = 0): DSh_RefBase<DSh_Obj>() { this->_acquire(p); }
 
     // operator DSh_Obj*() { return (DSh_Obj *)this->_ptr; }
 
-    DSh_ObjRef& operator=(DSh_Obj *p) {
+    DSh_Ref& operator=(DSh_Obj *p) {
         if ((DSh_Obj *)this != p) {
             this->_release();
             this->_acquire(p);

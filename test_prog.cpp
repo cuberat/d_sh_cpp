@@ -11,7 +11,7 @@
 
 int
 main(int argc, char **argv) {
-    DSh_ObjRef obj;
+    DSh_Ref obj;
 
     obj = new DSh_Obj();
 
