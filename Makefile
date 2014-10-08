@@ -19,8 +19,8 @@ SRC_FILES = d_sh_io.cpp d_sh_obj_base.cpp d_sh_ref.cpp d_sh_str.cpp
 
 HEADER_FILES = d_sh_io.h d_sh_obj_base.h d_sh_obj.h d_sh_ref.h d_sh_str.h
 
-GLIB_INCLUDES = `pkg-config --cflags glib-2.0`
-GLIB_LIBS = `pkg-config --libs glib-2.0`
+GLIB_INCLUDES := $(shell pkg-config --cflags glib-2.0)
+GLIB_LIBS := $(shell pkg-config --libs glib-2.0)
 INCLUDE = -I.. -I../include $(GLIB_INCLUDES)
 CFLAGS = $(INCLUDE) -fPIC -Wall $(DEBUG)
 LDFLAGS = $(GLIB_LIBS)
