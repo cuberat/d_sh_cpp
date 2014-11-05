@@ -1,3 +1,4 @@
+/* -*- mode: c++ -*- */
 /*
   Copyright (c) 2014 Don Owens <don@regexguy.com>.  All rights reserved.
 
@@ -13,8 +14,6 @@
 #include <stdio.h>
 
 #define D_SH_REF_DEBUG 1
-
-#include <d_sh_cpp/d_sh_obj.h>
 
 template <class T> class DSh_RefBase {
   public:
@@ -112,20 +111,5 @@ template <class T> class DSh_RefBase {
     
 };
 
-class DSh_Ref: public DSh_RefBase<DSh_Obj> {
-  public:
-  DSh_Ref(DSh_Obj *p = 0): DSh_RefBase<DSh_Obj>() { this->_acquire(p); }
-
-    // operator DSh_Obj*() { return (DSh_Obj *)this->_ptr; }
-
-    DSh_Ref& operator=(DSh_Obj *p) {
-        if ((DSh_Obj *)this != p) {
-            this->_release();
-            this->_acquire(p);
-        }
-        return *this;
-    }
-
-};
 
 #endif

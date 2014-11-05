@@ -8,6 +8,7 @@
   http://www.apache.org/licenses/LICENSE-2.0
  */
 
+#include <d_sh_cpp/d_sh_ref.h>
 #include <d_sh_cpp/d_sh_obj_base.h>
 
 #ifndef D_SH_OBJ_H
@@ -19,5 +20,16 @@ class DSh_Obj: public DSh_ObjBase {
 
   private:
 };
+
+class DSh_Ref: public DSh_RefBase<DSh_Obj> {
+  public:
+    DSh_Ref(DSh_Obj *p = 0): DSh_RefBase<DSh_Obj>(p) { }
+};
+
+#include <d_sh_cpp/d_sh_ref.h>
+
+#include <d_sh_cpp/d_sh_str.h>
+
+#include <d_sh_cpp/d_sh_io.h>
 
 #endif
