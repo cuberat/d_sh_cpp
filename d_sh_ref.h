@@ -13,7 +13,7 @@
 
 #include <stdio.h>
 
-#define D_SH_REF_DEBUG 1
+#define D_SH_REF_DEBUG 0
 
 template <class T> class DSh_RefBase {
   public:

@@ -9,3 +9,98 @@
 
 #include <d_sh_cpp/d_sh_obj.h>
 
+DSh_StrRef
+DSh_IO::format_cb(format_cb_t cb, DSh_StrRef val_specs, DSh_StrRef val_flags,
+    DSh_StrRef fmt, va_list ap) {
+    DSh_StrRef str = new DSh_Str("");
+    d_sh_uchar_t ch = 0;
+    d_sh_uchar_t fmt_start = (d_sh_uchar_t)'%';
+    int in_fmt = 0;
+    DSh_IORef f = new DSh_IO(fmt);
+    DSh_StrRef flags_found;
+    DSh_StrRef padding_found;
+    DSh_StrRef this_chunk;
+    
+    while (DSh_OK(f->get_char(&ch))) {
+        if (in_fmt) {
+            if (ch == fmt_start) {
+                /* escaped format start, so output literal */
+                str->append(fmt_start);
+                in_fmt = 0;
+                continue;
+            }
+
+            if (val_specs->has_char(ch)) {
+                this_chunk = cb(ch, padding_found, flags_found, ap);
+                str->append(this_chunk);
+
+                padding_found = new DSh_Str("");
+                flags_found = new DSh_Str("");
+
+                continue;
+            }
+
+            if (val_flags->has_char(ch)) {
+                flags_found->append(ch);
+                continue;
+            }
+            
+            padding_found->append(ch);
+        }
+        elsif (ch == fmt_start) {
+            in_fmt = 1;
+            flags_found = new DSh_Str("");
+            continue;
+        }
+        
+        str->append(ch);        
+    }
+    
+
+    return str;
+}
+
+DSh_StrRef
+DSh_IO::format_cb(format_cb_t cb, const char *val_specs, const char *val_flags,
+    DSh_StrRef fmt, va_list ap) {
+    DSh_StrRef val_specs_ref = new DSh_Str(val_specs);
+    DSh_StrRef va_flags_ref = new DSh_Str(va_flags);
+
+    return format_cb(cb, val_specs_ref, val_flags_ref, fmt, ap);
+}
+
+DSh_StrRef
+DSh_IO::format_cb(format_cb_t cb, const char *val_specs, const char *val_flags,
+    DSh_StrRef fmt, ...) {
+    va_list ap;
+    DSh_StrRef rv;
+    
+    va_start(ap, fmt);
+    rv = format_cb(cb, val_specs, val_flags, fmt, ap);
+    va_end(ap);
+
+    return rv;
+}
+
+DSh_StrRef
+DSh_IO::format_cb(format_cb_t cb, const char *val_specs, const char *val_flags,
+    const char *fmt, va_list ap) {
+    DSh_StrRef str_fmt = new DSh_Str(fmt);
+
+    return format_cb(cb, val_specs, val_flags, str_fmt, ap);
+}
+
+DSh_StrRef
+DSh_IO::format_cb(format_cb_t cb, const char *val_specs, const char *val_flags,
+    const char *fmt, ...) {
+    va_list ap;
+    DSh_StrRef rv;
+    
+    va_start(ap, fmt);
+    rv = format_cb(cb, val_specs, val_flags, fmt, ap);
+    va_end(ap);
+
+    return rv;
+}
+
+
