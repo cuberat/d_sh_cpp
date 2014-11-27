@@ -9,6 +9,24 @@
 
 #include <d_sh_cpp/d_sh_obj.h>
 
+DSh_StrRef
+format_callback(d_sh_uchar_t f, DSh_StrRef pad, DSh_StrRef flags,
+        va_list ap) {
+
+    fprintf(stdout, "format_callback: fmt_char=%u ('%c')\n", f, (int)f);
+    fflush(stdout);
+    fprintf(stdout, ", got pad="); fflush(stdout);
+    pad->write_fp(stdout); fflush(stdout);
+    fprintf(stdout, ", flags="); fflush(stdout);
+    flags->write_fp(stdout); fflush(stdout);
+    fprintf(stdout, "\n"); fflush(stdout);
+
+    /* s = va_arg(ap, char *); */
+
+    DSh_StrRef str = new DSh_Str("");
+    return str;
+}
+
 int
 main(int argc, char **argv) {
     DSh_Ref obj;
@@ -45,6 +63,19 @@ main(int argc, char **argv) {
     else { 
         printf("2. NOT equal\n");
     }
+
+    DSh_StrRef val_specs = "sd";
+    DSh_StrRef val_flags = "l";
+    DSh_StrRef fmt = "foo='%ld', bar='% s\n";
+
+    /*
+    const char *val_specs_c = "sd";
+    const char *val_flags_c = "l";
+    const char *fmt_c = "foo='%ld', bar='%s\n";
+    */
+
+    DSh_StrRef out_str = DSh_Str::format_cb(format_callback, val_specs, val_flags,
+        fmt, 1, "stuff");
 
     return 0;
 }

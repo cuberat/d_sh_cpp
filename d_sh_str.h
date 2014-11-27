@@ -22,7 +22,12 @@ class DSh_Str;
 class DSh_StrRef: public DSh_RefBase<DSh_Str> {
   public:
     DSh_StrRef(DSh_Str *p = 0): DSh_RefBase<DSh_Str>(p) { }
+    DSh_StrRef(const char *s);
+
+    /* DSh_StrRef& operator=(const char *p); */
 };
+
+typedef DSh_StrRef (*format_cb_t)(d_sh_uchar_t f, DSh_StrRef pad, DSh_StrRef flags, va_list ap);
 
 class DSh_Str: public DSh_Obj {
   public:
@@ -64,7 +69,9 @@ class DSh_Str: public DSh_Obj {
     }
 
     size_t write_fp(FILE *fp) {
-        return fwrite(_gstr->str, 1, (size_t)_gstr->len, fp);
+        // fprintf(stdout, "len=%zu\n", (size_t)this->_gstr->len); fflush(stdout);
+        return fwrite((void *)this->_gstr->str, 1, (size_t)this->_gstr->len,
+            fp);
     };
 
     void fmt_ap(const char *fmt, va_list ap);
@@ -89,7 +96,8 @@ class DSh_Str: public DSh_Obj {
     }
 
     int append(DSh_StrRef str) {
-        g_string_append_len(this->_gstr, str->str, str->len);
+        g_string_append_len(this->_gstr, str->_gstr->str,
+            str->_gstr->len);
         return 0;
     }
 
@@ -114,8 +122,8 @@ class DSh_Str: public DSh_Obj {
 
         if (this->_is_utf8) {
             if (! this->_utf8_validated) {
-                if (g_utf8_validate(this->_gstr->str, this->_g_str->len,
-                        (gchar **)0)) {
+                if (g_utf8_validate(this->_gstr->str, this->_gstr->len,
+                        (const gchar **)0)) {
                     this->_utf8_validated = 1;
                 }
                 return -3;
@@ -123,15 +131,15 @@ class DSh_Str: public DSh_Obj {
             gunichar c;
             gchar *next;
             c = g_utf8_get_char(&this->_gstr->str[*offset]);
-            next = g_utf8_next_char(&this->_gtr->str[*offset]);
-            *offset = next - this->_gtr->str;
+            next = g_utf8_next_char(&this->_gstr->str[*offset]);
+            *offset = next - this->_gstr->str;
             *ch = c;
             
             return 0;
         }
         else {
-            *ch = (d_sh_uchar_t)this->_gstr(*offset);
-            *offset++;
+            *ch = (d_sh_uchar_t)this->_gstr->str[*offset];
+            (*offset)++;
         }
 
         return 0;
@@ -156,6 +164,20 @@ class DSh_Str: public DSh_Obj {
             }
         }
     }
+
+
+    static DSh_StrRef format_cb(format_cb_t cb, DSh_StrRef val_specs,
+        DSh_StrRef val_flags, DSh_StrRef fmt, va_list ap);
+    static DSh_StrRef format_cb(format_cb_t cb, DSh_StrRef val_specs,
+        DSh_StrRef val_flags, DSh_StrRef fmt, ...);
+    static DSh_StrRef format_cb(format_cb_t cb, const char *val_specs,
+        const char *val_flags, DSh_StrRef fmt, ...);
+    static DSh_StrRef format_cb(format_cb_t cb, const char *val_specs,
+        const char *val_flags, DSh_StrRef fmt, va_list ap);
+    static DSh_StrRef format_cb(format_cb_t cb, const char *val_specs,
+        const char *val_flags, const char *fmt, ...);
+    static DSh_StrRef format_cb(format_cb_t cb, const char *val_specs,
+        const char *val_flags, const char *fmt, va_list ap);
 
 
   private:

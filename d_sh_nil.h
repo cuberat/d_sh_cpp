@@ -20,9 +20,9 @@ class DSh_Nil: public DSh_Obj {
   private:
 };
 
-class DSh_NilRef: public DSh_RefBase<DSh_IO> {
+class DSh_NilRef: public DSh_RefBase<DSh_Nil> {
   public:
-    DSh_NilRef(DSh_IO *p = 0): DSh_RefBase<DSh_Nil>(p) { }
+    DSh_NilRef(DSh_Nil *p = 0): DSh_RefBase<DSh_Nil>(p) { }
 };
 
 #endif

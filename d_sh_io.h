@@ -11,8 +11,6 @@
 #ifndef D_SH_IO_H
 #define D_SH_IO_H
 
-#include <stdarg.h>
-
 #include <d_sh_cpp/d_sh_str.h>
 
 class DSh_IOFileHandle: public DSh_Obj {
@@ -74,8 +72,6 @@ class DSh_IOSocketStream: public DSh_IOFileHandle {
 
 };
 
-typedef DSh_StrRef (*format_cb_t)(d_sh_uchar_t f, DSh_StrRef pad, DSh_StrRef flags, va_list ap);
-
 class DSh_IO: public DSh_Obj {
   public:
     DSh_IO(DSh_StrRef str) {
@@ -83,8 +79,10 @@ class DSh_IO: public DSh_Obj {
         this->_handle = stream;
     }
 
-    static new_string_writer() {
-
+    static DSh_IO *new_string_writer() {
+        DSh_StrRef str = new DSh_Str("");
+        DSh_IO *writer = new DSh_IO(str);
+        return writer;
     }
 
     virtual int get_byte(unsigned char *b) {
@@ -103,16 +101,6 @@ class DSh_IO: public DSh_Obj {
         return rv;
     }    
 
-    static format_cb(format_cb_t cb, DSh_StrRef val_specs,
-        DSh_StrRef val_flags, DSh_StrRef fmt, va_list ap);
-    static DSh_StrRef format_cb(format_cb_t cb, const char *val_specs,
-        const char *val_flags, DSh_StrRef fmt, ...);
-    static DSh_StrRef format_cb(format_cb_t cb, const char *val_specs,
-        const char *val_flags, DSh_StrRef fmt, va_list ap);
-    static DSh_StrRef format_cb(format_cb_t cb, const char *val_specs,
-        const char *val_flags, const char *fmt, ...);
-    static DSh_StrRef format_cb(format_cb_t cb, const char *val_specs,
-        const char *val_flags, const char *fmt, va_list ap);
 
   private:
     DSh_IO(): DSh_Obj(), _handle(0) { };

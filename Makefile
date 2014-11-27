@@ -34,7 +34,7 @@ test: test_prog
 	./test_prog
 
 test_prog: test_prog.cpp $(OBJS)
-	$(GPP) -o $@ $(CFLAGS) $< $(LDFLAGS)
+	$(GPP) -o $@ $(CFLAGS) $< $(OBJS) $(LDFLAGS)
 
 echoobjs:
 	@echo $(OBJS)
