@@ -11,7 +11,7 @@
 
 DSh_StrRef
 DSh_Str::format_cb(format_cb_t cb, DSh_StrRef val_specs, DSh_StrRef val_flags,
-    DSh_StrRef fmt, va_list ap) {
+    va_list ap, DSh_StrRef fmt) {
     DSh_StrRef str = new DSh_Str("");
     d_sh_uchar_t ch = 0;
     d_sh_uchar_t fmt_start = (d_sh_uchar_t)'%';
@@ -43,6 +43,7 @@ DSh_Str::format_cb(format_cb_t cb, DSh_StrRef val_specs, DSh_StrRef val_flags,
             }
             
             padding_found->append(ch);
+            continue;
         }
         else if (ch == fmt_start) {
             in_fmt = 1;
@@ -65,7 +66,7 @@ DSh_Str::format_cb(format_cb_t cb, DSh_StrRef val_specs, DSh_StrRef val_flags,
     va_list ap;
 
     va_start(ap, fmt);
-    rv = format_cb(cb, val_specs, val_flags, fmt, ap);
+    rv = format_cb(cb, val_specs, val_flags, ap, fmt);
     va_end(ap);
 
     return rv;
@@ -133,16 +134,16 @@ DSh_StrRef::DSh_StrRef(const char *s) {
 
 
 void
-DSh_Str::fmt_ap(const char *fmt, va_list ap) {
+DSh_Str::fmt_c_ap(const char *fmt, va_list ap) {
     g_string_vprintf(this->_gstr, (const gchar *)fmt, ap);
 }
 
 void
-DSh_Str::fmt(const char *fmt, ...) {
+DSh_Str::fmt_c(const char *fmt, ...) {
     va_list ap;
     
     va_start(ap, fmt);
-    this->fmt_ap(fmt, ap);
+    this->fmt_c_ap(fmt, ap);
     va_end(ap);
 }
 
@@ -152,7 +153,7 @@ DSh_Str::sprintf(const char *fmt, ...) {
     DSh_Str *str = new DSh_Str(1);
 
     va_start(ap, fmt);
-    str->fmt_ap(fmt, ap);
+    str->fmt_c_ap(fmt, ap);
     va_end(ap);
 
     return str;

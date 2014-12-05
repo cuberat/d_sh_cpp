@@ -56,6 +56,8 @@ class DSh_Str: public DSh_Obj {
         }
     }
 
+    virtual int is_str() { return 1; }
+
     int equal(DSh_StrRef str) {
         if (this->_gstr->len != str->_gstr->len) {
             return 0;
@@ -74,8 +76,8 @@ class DSh_Str: public DSh_Obj {
             fp);
     };
 
-    void fmt_ap(const char *fmt, va_list ap);
-    void fmt(const char *fmt, ...);
+    void fmt_c_ap(const char *fmt, va_list ap);
+    void fmt_c(const char *fmt, ...);
     DSh_Str *sprintf(const char *fmt, ...);
     
     int append(d_sh_uchar_t ch) {
@@ -98,6 +100,16 @@ class DSh_Str: public DSh_Obj {
     int append(DSh_StrRef str) {
         g_string_append_len(this->_gstr, str->_gstr->str,
             str->_gstr->len);
+        return 0;
+    }
+
+    int append_printf_c(const char *fmt, ...) {
+        va_list ap;
+
+        va_start(ap, fmt);
+        g_string_append_vprintf(this->_gstr, (const gchar *)fmt, ap);
+        va_end(ap);
+
         return 0;
     }
 
@@ -167,7 +179,7 @@ class DSh_Str: public DSh_Obj {
 
 
     static DSh_StrRef format_cb(format_cb_t cb, DSh_StrRef val_specs,
-        DSh_StrRef val_flags, DSh_StrRef fmt, va_list ap);
+        DSh_StrRef val_flags, va_list ap, DSh_StrRef fmt);
     static DSh_StrRef format_cb(format_cb_t cb, DSh_StrRef val_specs,
         DSh_StrRef val_flags, DSh_StrRef fmt, ...);
     static DSh_StrRef format_cb(format_cb_t cb, const char *val_specs,

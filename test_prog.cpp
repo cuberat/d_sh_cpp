@@ -24,6 +24,21 @@ format_callback(d_sh_uchar_t f, DSh_StrRef pad, DSh_StrRef flags,
     /* s = va_arg(ap, char *); */
 
     DSh_StrRef str = new DSh_Str("");
+
+    switch (f) {
+      case 'd':
+          int i;
+          i = va_arg(ap, int);
+          str->append_printf_c("%d", i);
+          break;
+
+      case 's':
+          char *s;
+          s = va_arg(ap, char *);
+          str->append_printf_c("%s", s);
+          break;
+    }
+
     return str;
 }
 
@@ -33,7 +48,12 @@ main(int argc, char **argv) {
     DSh_StrRef str;
     DSh_StrRef str2;
     DSh_IORef io;
+    DSh_StrRef utf8_str = "";
     unsigned char c = 0;
+    d_sh_uchar_t ch = 0;
+    size_t num_read = 0;
+    int rc = 0;
+
 
     obj = new DSh_Obj();
     str = new DSh_Str("foo\n");
@@ -64,9 +84,29 @@ main(int argc, char **argv) {
         printf("2. NOT equal\n");
     }
 
+    utf8_str = "\xc3\xa9"; // should be U+00e9
+    io = new DSh_IO(utf8_str);
+
+    if (DSh_OK(rc = io->get_char(&ch, &num_read))) {
+        printf("got U+%04x at line %d\n", ch, __LINE__);
+    }
+    else {
+        printf("bad return code %d at line %d\n", rc, __LINE__);
+    }
+
+    utf8_str = "\xE7\x81\xAB"; // should be U+706b
+    io = new DSh_IO(utf8_str);
+
+    if (DSh_OK(rc = io->get_char(&ch, &num_read))) {
+        printf("got U+%04x at line %d\n", ch, __LINE__);
+    }
+    else {
+        printf("bad return code %d at line %d\n", rc, __LINE__);
+    }
+
     DSh_StrRef val_specs = "sd";
     DSh_StrRef val_flags = "l";
-    DSh_StrRef fmt = "foo='%ld', bar='% s\n";
+    DSh_StrRef fmt = "foo='%ld', bar='% 0s'\n";
 
     /*
     const char *val_specs_c = "sd";
@@ -74,8 +114,15 @@ main(int argc, char **argv) {
     const char *fmt_c = "foo='%ld', bar='%s\n";
     */
 
+    /*
     DSh_StrRef out_str = DSh_Str::format_cb(format_callback, val_specs, val_flags,
         fmt, 1, "stuff");
+
+    printf("Got str: '");
+    out_str->write_fp(stdout);
+    printf("'\n"); fflush(stdout);
+    */
+
 
     return 0;
 }

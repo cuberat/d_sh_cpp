@@ -21,6 +21,10 @@ class DSh_Obj: public DSh_ObjBase {
     DSh_Obj(): DSh_ObjBase() { }
 
     virtual int is_nil() { return 0; }
+    virtual int is_str() { return 0; }
+    virtual int is_io() { return 0; }
+    virtual int is_map() { return 0; }
+
 
   private:
 };

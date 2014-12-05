@@ -18,6 +18,8 @@ class DSh_Map: public DSh_Obj {
     DSh_Map(): DSh_Obj() { this->_hash = g_hash_table_new_full(_hash_func,
             _key_equal_func, _destroy_func, _destroy_func);}
 
+    virtual int is_map() { return 1; }
+
   private:
     GHashTable *_hash;
     
