@@ -14,13 +14,14 @@
 #include <d_sh_cpp/d_sh_str.h>
 
 typedef int (*d_sh_io_next_byte_cb_t)(unsigned char *b, void *cb_data);
+typedef int (*d_sh_io_write_byte_cb_t)(unsigned char b, void *cb_data);
 
 class DSh_IOFileHandle: public DSh_Obj {
   public:
     ~DSh_IOFileHandle() { }
 
     virtual int get_byte(unsigned char *b) { return 2; }
-    virtual int put_byte(unsigned char *b) { return 2; }
+    virtual int put_byte(unsigned char b) { return 2; }
     virtual int get_buf(unsigned char *buf, size_t size) { return 2; }
     virtual int put_buf(unsigned char *buf, size_t size) { return 2; }
     virtual int flush_stream() { return 2; }
@@ -51,16 +52,26 @@ class DSh_IOFileHandle: public DSh_Obj {
             num_bytes_read);
     }
 
-    virtual int put_char(d_sh_uchar_t ch, size_t *num_bytes_written = 0) {
-        // FIXME: implement
+    static int put_byte_callback(unsigned char b, void *cb_data) {
+        DSh_IOFileHandle *io = (DSh_IOFileHandle *)cb_data;
+        int rc;
 
-        return -1;
+        rc = io->put_byte(b);
+
+        return rc;
+    }
+
+    virtual int put_char(d_sh_uchar_t ch, size_t *num_bytes_written = 0) {
+        return unicode_to_utf8_bytes(ch, put_byte_callback, this,
+            num_bytes_written);
     }
 
     DSh_IOFileHandle() { }
 
     int unicode_from_utf8_bytes(d_sh_uchar_t *code_point,
         d_sh_io_next_byte_cb_t read_cb, void *cb_data, size_t *bytes_read);
+    int unicode_to_utf8_bytes(d_sh_uchar_t cp,
+        d_sh_io_write_byte_cb_t write_cb, void *cb_data, size_t *bytes_written);
 
   protected:
 
@@ -115,6 +126,11 @@ class DSh_IOFileStream: public DSh_IOFileHandle {
         return 1;
     }
 
+    virtual int put_byte(unsigned char b) {
+        fwrite(&b, 1, 1, this->_fp);
+        return 0;
+    }
+
     // FIXME: implement utf-8
     /*    virtual int get_char(d_sh_uchar_t *c) {
         unsigned char b = 0;
@@ -165,15 +181,10 @@ class DSh_IO: public DSh_Obj {
     // FIXME: implement utf-8
     virtual int get_char(d_sh_uchar_t *c, size_t *num_bytes_read = 0) {
         return this->_handle->get_char(c, num_bytes_read);
-        /*        unsigned char b = 0;
-        int rv = this->_handle->get_byte(&b);
+    }
 
-        if (DSh_OK(rv)) {
-            *c = (d_sh_uchar_t)b;
-        }
-        
-        return rv;
-        */
+    virtual int put_char(d_sh_uchar_t ch, size_t *num_bytes_written = 0) {
+        return this->_handle->put_char(ch, num_bytes_written);
     }    
 
     int printf_obj(DSh_StrRef fmt, ...);

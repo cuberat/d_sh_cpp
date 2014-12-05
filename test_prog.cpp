@@ -104,6 +104,11 @@ main(int argc, char **argv) {
         printf("bad return code %d at line %d\n", rc, __LINE__);
     }
 
+    io = new DSh_IO(stdout);
+    io->put_char(0x706b);
+    printf("\n"); fflush(stdout);
+    
+
     DSh_StrRef val_specs = "sd";
     DSh_StrRef val_flags = "l";
     DSh_StrRef fmt = "foo='%ld', bar='% 0s'\n";

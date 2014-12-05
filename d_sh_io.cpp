@@ -139,3 +139,79 @@ DSh_IOFileHandle::unicode_from_utf8_bytes(d_sh_uchar_t *code_point,
 
     return 0;
 }
+
+int
+DSh_IOFileHandle::unicode_to_utf8_bytes(d_sh_uchar_t cp,
+    d_sh_io_write_byte_cb_t write_cb, void *cb_data, size_t *bytes_written) {
+
+    unsigned char the_byte = 0;
+    size_t amt_wrote = 0;
+
+    SAFE_SET_POINTER_VAL(bytes_written, 0);
+
+    if (UNICODE_IS_INVARIANT(cp)) {
+        the_byte = cp;
+        SAFE_SET_POINTER_VAL(bytes_written, amt_wrote);
+        return write_cb(the_byte, cb_data);
+    }
+
+    if (cp < 0x0800) {
+        /* 2 bytes */
+        the_byte = (cp >> 6)         | 0xc0;
+        write_cb(the_byte, cb_data);
+        amt_wrote++;
+        the_byte = (cp       & 0x3f) | 0x80;
+        write_cb(the_byte, cb_data);
+        amt_wrote++;
+
+        SAFE_SET_POINTER_VAL(bytes_written, amt_wrote);
+
+        return 0;
+    }
+    
+    if (cp < 0x010000) {
+        /* 3 bytes */
+        the_byte = (cp >> 12)         | 0xe0;
+        write_cb(the_byte, cb_data);
+        amt_wrote++;
+
+        the_byte = ((cp >> 6) & 0x3f) | 0x80;
+        write_cb(the_byte, cb_data);
+        amt_wrote++;
+
+        the_byte = (cp        & 0x3f) | 0x80;
+        write_cb(the_byte, cb_data);
+        amt_wrote++;
+
+
+        SAFE_SET_POINTER_VAL(bytes_written, amt_wrote);
+
+        return 0;
+    }
+
+    if (cp < 0x200000) {
+        /* 4 bytes */
+        the_byte = (cp >> 18)           | 0xf0;
+        write_cb(the_byte, cb_data);
+        amt_wrote++;
+
+        the_byte = ((cp >> 12)  & 0x3f) | 0x80;
+        write_cb(the_byte, cb_data);
+        amt_wrote++;
+
+        the_byte = ((cp >> 6)   & 0x3f) | 0x80;
+        write_cb(the_byte, cb_data);
+        amt_wrote++;
+
+        the_byte = (cp          & 0x3f) | 0x80;
+        write_cb(the_byte, cb_data);
+        amt_wrote++;
+
+        SAFE_SET_POINTER_VAL(bytes_written, amt_wrote);
+
+        return 0;
+    }
+
+    /* invalid */
+    return -1;
+}
